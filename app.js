@@ -1,5 +1,4 @@
 const { argv } = require('node:process');
-const url = require('node:url');
 
 const express = require('express');
 var logger = require('morgan');
