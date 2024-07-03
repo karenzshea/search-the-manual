@@ -1,0 +1,20 @@
+
+  6 Arrangement View
+
+The /Arrangement View/ displays the Arrangement, which contains music
+laid out along a song timeline, like a multitrack tape.
+
+
+    6.13.1 Navigation
+
+    1. stuff
+    2. stuff
+    3. stuff
+
+Live offers several fast methods for zooming and scrolling the
+Arrangement display:
+
+    6.1.2 Transport
+
+There are a number of ways to control Live’s transport with the computer
+keyboard and mouse:
