@@ -9,7 +9,7 @@ const elasticConfig = config.get('elastic');
 
 const connect = async () => {
     const client = new Client({
-        node: 'https://localhost:443',
+        node: elasticConfig.endpoint_url,
         auth: {
             username: elasticConfig.username,
             password: elasticConfig.password
