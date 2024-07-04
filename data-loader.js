@@ -65,3 +65,29 @@ exports.load = async (index, filepath, baseUrl) => {
         return false;
     }
 };
+
+exports.bulk_load = async (index, filepath) => {
+    try {
+        await client.indices.create({
+            index: 'index',
+            operations: {
+                mappings: {
+                    properties: {
+                        chapter_number: { type: 'text' },
+                        chapter_name: { type: 'text' },
+                        section_number: { type: 'text' },
+                        section_name: { type: 'text' },
+                        text: { type: 'text' },
+                        text_url: { type: 'text' },
+                    },
+                },
+            },
+        });
+
+        return true;
+    } catch (err) {
+        console.error(err);
+
+        return false;
+    }
+};
