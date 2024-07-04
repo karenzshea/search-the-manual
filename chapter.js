@@ -20,8 +20,8 @@ const fs = require('node:fs/promises');
 // E.g. "6 Arrangement View"
 const chapterNrRe = new RegExp(/^(\d+)[\s](.*)$/);
 
-// E.g "8.1.7"
-const sectionNrRe = new RegExp(/^(\d+)(\s|\.\d+)+(.*)$/);
+// E.g "8.1.7 Making it sound wacky"
+const sectionNrRe = new RegExp(/^(\d+)(\.\d+)+[\s](.*)$/);
 
 class Chapter {
     constructor() {
@@ -83,14 +83,15 @@ const parse = async (filepath, baseUrlString) => {
                 chapter.sections.push(currentSection);
 
                 // start new section
+                currentSection = new Section();
+                currentSection.section_number = match[0].split(' ')[0];
+                currentSection.section_name = match[3];
+
                 const sectionFragment = `#${match[3].toLowerCase().replaceAll(' ', '-')}`;
                 const sectionUrl = new URL(
                     sectionFragment,
                     chapter.chapter_url
                 );
-                currentSection = new Section();
-                currentSection.section_number = match[1];
-                currentSection.section_name = match[3];
                 currentSection.section_url = sectionUrl.href;
             }
 
