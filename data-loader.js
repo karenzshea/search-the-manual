@@ -2,7 +2,7 @@ const fs = require('node:fs');
 
 const parser = require('./section');
 
-const { Client } = require('@elastic/elasticsearch')
+const { Client } = require('@elastic/elasticsearch');
 const config = require('config');
 
 const elasticConfig = config.get('elastic');
@@ -12,16 +12,16 @@ const connect = async () => {
         node: elasticConfig.endpoint_url,
         auth: {
             username: elasticConfig.username,
-            password: elasticConfig.password
+            password: elasticConfig.password,
         },
         tls: {
             ca: fs.readFileSync('./http_ca.crt'),
-            rejectUnauthorized: false
-        }
+            rejectUnauthorized: false,
+        },
     });
 
     return client;
-}
+};
 
 exports.load = async (index, filepath) => {
     try {
@@ -33,8 +33,7 @@ exports.load = async (index, filepath) => {
 
         const client = await connect();
 
-        for (number in sections)
-        {
+        for (number in sections) {
             console.log(`Add index: ${number}`);
 
             await client.index({
@@ -46,7 +45,7 @@ exports.load = async (index, filepath) => {
             });
         }
 
-        await client.indices.refresh({index: index})
+        await client.indices.refresh({ index: index });
 
         return true;
     } catch (err) {
@@ -54,4 +53,4 @@ exports.load = async (index, filepath) => {
 
         return false;
     }
-}
+};

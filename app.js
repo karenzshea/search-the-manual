@@ -20,13 +20,14 @@ const main = async () => {
     const port = 3000;
 
     // enable logging
-    logger = logger(':method :url :status :res[content-length] - :response-time ms');
+    logger = logger(
+        ':method :url :status :res[content-length] - :response-time ms'
+    );
     app.use(logger);
 
     app.listen(port, function () {
-      console.log(`Example app listening on port ${port}!`);
+        console.log(`Example app listening on port ${port}!`);
     });
-
-}
+};
 
 main();
