@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 
-const parser = require('./section');
+const parser = require('./chapter');
 
 const { Client } = require('@elastic/elasticsearch');
 const config = require('config');
@@ -23,24 +23,35 @@ const connect = async () => {
     return client;
 };
 
-exports.load = async (index, filepath) => {
+exports.load = async (index, filepath, baseUrl) => {
     try {
-        const sections = await parser.parse(filepath);
+        const chapter = await parser.parse(filepath, baseUrl);
 
-        if (!sections) {
+        if (!chapter) {
+            console.log('No data');
             return true;
         }
 
         const client = await connect();
 
-        for (number in sections) {
-            console.log(`Add index: ${number}`);
+        console.log(
+            `Indexing chapter: ${chapter.chapter_number} ${chapter.chapter_name}`
+        );
+
+        for (i = 0; i < chapter.sections.length; i++) {
+            const section = chapter.sections[i];
+
+            console.log(
+                `Indexing section: ${section.section_number} ${section.section_name}`
+            );
 
             await client.index({
                 index: index,
                 body: {
-                    section_number: number,
-                    text: sections[number],
+                    section_name: section.section_name,
+                    section_number: section.section_number,
+                    section_url: section.section_url,
+                    text: section.text,
                 },
             });
         }
