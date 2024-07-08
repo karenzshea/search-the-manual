@@ -34,8 +34,11 @@ services:
     networks:
       - elastic
     volumes:
+      - escerts1:/usr/share/elasticsearch/config:rw
       - esdata1:/usr/share/elasticsearch/data:rw
 
 volumes:
   esdata1:
+    driver: local
+  escerts1:
     driver: local
