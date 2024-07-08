@@ -69,7 +69,11 @@ const parse = async (filepath, baseUrlString) => {
             // get the initial chapter information from the first line
             const match = chapterNrRe.exec(line.trim());
             if (match) {
-                const chapterPath = match[2].toLowerCase().replaceAll(' ', '-');
+                const chapterPath = match[2]
+                    .toLowerCase()
+                    .replaceAll(',', '')
+                    .replaceAll(' ', '-')
+                    .replaceAll('/', '-');
                 const chapterUrl = new URL(chapterPath, baseUrl);
                 chapter.setChapterInfo(match[1], match[2], chapterUrl.href);
                 currentSection.fromChapter(chapter);
