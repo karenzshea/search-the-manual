@@ -32,11 +32,11 @@ exports.load = async (index, filepath, baseUrl) => {
             return true;
         }
 
-        const client = await connect();
-
         console.log(
             `Indexing chapter: ${chapter.chapter_number} ${chapter.chapter_name}`
         );
+
+        const client = await connect();
 
         for (i = 0; i < chapter.sections.length; i++) {
             const section = chapter.sections[i];
