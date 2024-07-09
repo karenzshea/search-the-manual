@@ -38,6 +38,8 @@ exports.load = async (index, filepath, baseUrl) => {
 
         const client = await connect();
 
+        indexReqs = [];
+
         for (i = 0; i < chapter.sections.length; i++) {
             const section = chapter.sections[i];
 
@@ -45,7 +47,7 @@ exports.load = async (index, filepath, baseUrl) => {
                 `Indexing section: ${section.section_number} ${section.section_name}`
             );
 
-            await client.index({
+            indexReqs.push( client.index({
                 index: index,
                 body: {
                     section_name: section.section_name,
@@ -53,8 +55,10 @@ exports.load = async (index, filepath, baseUrl) => {
                     section_url: section.section_url,
                     text: section.text,
                 },
-            });
+            }));
         }
+
+        await Promise.all(indexReqs);
 
         await client.indices.refresh({ index: index });
 
