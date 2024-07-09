@@ -1,4 +1,5 @@
-const fs = require('node:fs/promises');
+const fs = require('node:fs');
+const readline = require('node:readline');
 
 /*
  * Given a file representing an entire chapter, returns an object:
@@ -60,58 +61,67 @@ const parse = async (filepath, baseUrlString) => {
     // return object
     let chapter = new Chapter();
 
-    const chapterFd = await fs.open(filepath);
-
     let currentSection = new Section();
 
-    for await (const line of chapterFd.readLines()) {
-        if (!chapter.hasChapterInfo()) {
-            // get the initial chapter information from the first line
-            const match = chapterNrRe.exec(line.trim());
-            if (match) {
-                const chapterPath = match[2]
-                    .toLowerCase()
-                    .replaceAll(',', '')
-                    .replaceAll(' ', '-')
-                    .replaceAll('/', '-');
-                const chapterUrl = new URL(chapterPath, baseUrl);
-                chapter.setChapterInfo(match[1], match[2], chapterUrl.href);
-                currentSection.fromChapter(chapter);
+    return new Promise((resolve, reject) => {
+        const fileStream = fs.createReadStream(filepath);
+
+        const rl = readline.createInterface({
+            input: fileStream,
+            crlfDelay: Infinity,
+          });
+
+        rl.on('line', (line) => {
+            if (!chapter.hasChapterInfo()) {
+                // get the initial chapter information from the first line
+                const match = chapterNrRe.exec(line.trim());
+                if (match) {
+                    const chapterPath = match[2]
+                        .toLowerCase()
+                        .replaceAll(',', '')
+                        .replaceAll(' ', '-')
+                        .replaceAll('/', '-');
+                    const chapterUrl = new URL(chapterPath, baseUrl);
+                    chapter.setChapterInfo(match[1], match[2], chapterUrl.href);
+                    currentSection.fromChapter(chapter);
+                }
+            } else {
+                const match = sectionNrRe.exec(line.trim());
+
+                // found a new sub-section
+                if (match && match[1] == chapter.chapter_number) {
+                    // new section means current section is done
+                    chapter.sections.push(currentSection);
+
+                    // start new section
+                    currentSection = new Section();
+                    currentSection.section_number = match[0].split(' ')[0];
+                    currentSection.section_name = match[3];
+
+                    const sectionFragment = `#${match[3].toLowerCase().replaceAll(' ', '-')}`;
+                    const sectionUrl = new URL(
+                        sectionFragment,
+                        chapter.chapter_url
+                    );
+                    currentSection.section_url = sectionUrl.href;
+                }
+
+                currentSection.text += `${line}\n`;
             }
-        } else {
-            const match = sectionNrRe.exec(line.trim());
+        });
 
-            // found a new sub-section
-            if (match && match[1] == chapter.chapter_number) {
-                // new section means current section is done
-                chapter.sections.push(currentSection);
-
-                // start new section
-                currentSection = new Section();
-                currentSection.section_number = match[0].split(' ')[0];
-                currentSection.section_name = match[3];
-
-                const sectionFragment = `#${match[3].toLowerCase().replaceAll(' ', '-')}`;
-                const sectionUrl = new URL(
-                    sectionFragment,
-                    chapter.chapter_url
-                );
-                currentSection.section_url = sectionUrl.href;
+        rl.on('close', () => {
+            // exit if no chapter information found
+            if (!chapter.hasChapterInfo()) {
+                reject('Invalid chapter file format');
             }
 
-            currentSection.text += `${line}\n`;
-        }
-    }
+            // flush last section
+            chapter.sections.push(currentSection);
 
-    // exit if no chapter information found
-    if (!chapter.hasChapterInfo()) {
-        throw Error('Invalid chapter file format');
-    }
-
-    // flush last section
-    chapter.sections.push(currentSection);
-
-    return chapter;
+            resolve(chapter);
+        });
+    });
 };
 
 exports.parse = parse;
