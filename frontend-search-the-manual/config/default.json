@@ -1,0 +1,6 @@
+{
+    "backend": {
+        "url": "https://localhost:443",
+        "index": "live-12-docs"
+    }
+}
